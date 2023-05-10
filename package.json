@@ -1,0 +1,23 @@
+{
+  "name": "markdown-it-data-attribute",
+  "author": "Philip Thongkhamchanh <philip@thongkhamchanh.me> (https://thongkhamchanh.me)",
+  "version": "1.0.0",
+  "description": "A Markdown-It Plugin that assigns each header and its sibling content a random key",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/markdown-it": "^12.2.3",
+    "rimraf": "^5.0.0",
+    "terser": "^5.17.2",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "markdown-it": "^13.0.1",
+    "nanoid": "^3.3.6"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "npm run clean && tsc && npm run minify:js",
+    "minify:js": "terser dist/index.js -o dist/index.min.js"
+  },
+  "main": "dist/index.min.js"
+}
