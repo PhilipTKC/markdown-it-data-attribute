@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 * This plugin also adds data-key-content to all sibling elements belonging to the same heading.
 */
 const dataAttributePlugin = (md: MarkdownIt) => {
-    return md.renderer.rules.heading_open = (tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer) => {
+    md.renderer.rules.heading_open = (tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer) => {
         tokens[idx].attrPush(['data-key', nanoid(8)]);
 
         let nextHeaderIdx = idx + 1;
