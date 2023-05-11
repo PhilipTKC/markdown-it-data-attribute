@@ -8,9 +8,10 @@ import { nanoid } from "nanoid";
 * This plugin assigns a random data-key attribute to all headings.
 * This plugin also adds data-key-content to all sibling elements belonging to the same heading.
 */
-export const dataAttributePlugin = (md: MarkdownIt) => {
+const dataAttributePlugin = (md: MarkdownIt) => {
     return md.renderer.rules.heading_open = (tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer) => {
         tokens[idx].attrPush(['data-key', nanoid(8)]);
+
         let nextHeaderIdx = idx + 1;
         while (nextHeaderIdx < tokens.length && tokens[nextHeaderIdx].type !== 'heading_open') {
             nextHeaderIdx++;
@@ -19,9 +20,11 @@ export const dataAttributePlugin = (md: MarkdownIt) => {
         for (let i = idx + 1; i < nextHeaderIdx; i++) {
             if (tokens[i].type === 'text') continue;
 
-            const parentSlug = tokens[idx].attrs!.filter(attr => attr[0] === 'data-key')[0][1];
-            tokens[i].attrPush(['data-key-content', parentSlug]);
+            const parentKey = tokens[idx].attrs!.filter(attr => attr[0] === 'data-key')[0][1];
+            tokens[i].attrPush(['data-key-content', parentKey]);
         }
         return self.renderToken(tokens, idx, options);
     };
 }
+
+export default dataAttributePlugin;

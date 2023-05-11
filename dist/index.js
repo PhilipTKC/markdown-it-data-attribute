@@ -1,12 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dataAttributePlugin = void 0;
 const nanoid_1 = require("nanoid");
 /**
 * This plugin assigns a random data-key attribute to all headings.
 * This plugin also adds data-key-content to all sibling elements belonging to the same heading.
 */
-const dataAttributePlugin = (md) => {
+const plugin = (md) => {
     return md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
         tokens[idx].attrPush(['data-key', (0, nanoid_1.nanoid)(8)]);
         let nextHeaderIdx = idx + 1;
@@ -22,4 +21,4 @@ const dataAttributePlugin = (md) => {
         return self.renderToken(tokens, idx, options);
     };
 };
-exports.dataAttributePlugin = dataAttributePlugin;
+exports.default = plugin;
