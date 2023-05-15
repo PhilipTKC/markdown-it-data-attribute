@@ -22,13 +22,17 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
         }
 
         for (let i = idx + 1; i < nextHeaderIdx; i++) {
-            if (tokens[i].type === 'text') continue;
-
-            const parentKey = tokens[idx].attrs!.filter(attr => attr[0] === HEADER_KEY)[0][1];
-            tokens[i].attrPush([CONTENT_KEY, parentKey]);
+            if (!tokens[i].type.includes("_close")) {
+                const parentKey = tokens[idx].attrs!.filter(attr => attr[0] === HEADER_KEY)[0][1];
+                tokens[i].attrPush([CONTENT_KEY, parentKey]);
+            }
         }
         return self.renderToken(tokens, idx, options);
     };
 }
 
 export default dataAttributePlugin;
+
+const md = new MarkdownIt();
+
+md.use(dataAttributePlugin);

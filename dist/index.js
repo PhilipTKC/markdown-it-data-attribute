@@ -1,5 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const markdown_it_1 = __importDefault(require("markdown-it"));
 const nanoid_1 = require("nanoid");
 /**
 * This plugin assigns a random data-key attribute to all headings.
@@ -15,12 +19,14 @@ const dataAttributePlugin = (md) => {
             nextHeaderIdx++;
         }
         for (let i = idx + 1; i < nextHeaderIdx; i++) {
-            if (tokens[i].type === 'text')
-                continue;
-            const parentKey = tokens[idx].attrs.filter(attr => attr[0] === HEADER_KEY)[0][1];
-            tokens[i].attrPush([CONTENT_KEY, parentKey]);
+            if (!tokens[i].type.includes("_close")) {
+                const parentKey = tokens[idx].attrs.filter(attr => attr[0] === HEADER_KEY)[0][1];
+                tokens[i].attrPush([CONTENT_KEY, parentKey]);
+            }
         }
         return self.renderToken(tokens, idx, options);
     };
 };
 exports.default = dataAttributePlugin;
+const md = new markdown_it_1.default();
+md.use(dataAttributePlugin);
