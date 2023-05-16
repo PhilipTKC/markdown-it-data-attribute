@@ -1,63 +1,60 @@
 import MarkdownIt, { PluginSimple } from 'markdown-it';
-import Renderer from 'markdown-it/lib/renderer';
+import StateCore from 'markdown-it/lib/rules_core/state_core';
 import Token from 'markdown-it/lib/token';
 
 import { nanoid } from "nanoid";
 
-/**
-* This plugin assigns a random data-key attribute to all headings.
-* This plugin also adds data-key-content to all sibling elements belonging to the same heading.
-*/
 const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
 
     const headerKey = "data-key";
     const contentKey = "data-key-content";
 
-    md.renderer.rules.heading_open = (tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer) => {
-        const id = nanoid(8);
+    md.core.ruler.push("data-attributes", (state: StateCore) => {
+        const tokens = state.tokens;
+        const sections: number[][] = [];
+        let currentSection: number[] = [];
 
-        // Push the data-key attribute to the current heading.
-        tokens[idx].attrPush([headerKey, id]);
+        for (let i = 0; i < tokens.length; i++) {
 
-        /*
-        * Loop through tokens and find the next heading index.
-        * idx is the current heading index.
-        * Example
-        * Start (idx): 0, Next (nextHeadingIdx): Unknown
-        * Loop through tokens to find next heading.
-        * Start (idx): 0, Next (nextHeadingIdx): 5
-        */
-        let nextHeaderIdx = tokens.findIndex((token, i) => i > idx && token.type === 'heading_open');
-
-        /* 
-        * If there is no next heading
-        * Example
-        * ```
-        * # Heading 1 (Current Data Attribute Set)
-        * Paragraph 1 Set in the for loop below.
-        * # Heading 2 (Current Data Attribute Set)
-        * Paragraph 2 (Data attribute cannot be set because no next header was found, nextHeaderIdx === -1)
-        * ```
-        * 
-        * Set the nextHeaderIdx to the length of the tokens.
-        * This is require to loop through the remaining tokens.
-        * Paragraph 2 can now be set in the for loop below.
-        */
-        if (nextHeaderIdx === -1) {
-            nextHeaderIdx = tokens.length - 1;
-        }
-
-        /*
-        * Loop through all tokens and set the current header and its siblings to the same id attribute.
-        */
-        for (let i = idx + 1; i < nextHeaderIdx; i++) {
-            if (!tokens[i].type.includes("_close")) {
-                const parentKey = tokens[idx].attrs!.filter(attr => attr[0] === headerKey)[0][1];
-                tokens[i].attrPush([contentKey, parentKey]);
+            if (tokens[i].type === "heading_open") {
+                if (currentSection.length > 0) {
+                    sections.push(currentSection);
+                }
+                currentSection = [i];
+            } else if (tokens[i].type.includes("open") && currentSection.length > 0) {
+                currentSection.push(i);
+            } else if (tokens[i].type.includes("close") && currentSection.length > 0) {
+                currentSection.push(i);
             }
         }
-        return self.renderToken(tokens, idx, options);
-    };
-}
+
+        if (currentSection.length > 0) {
+            sections.push(currentSection);
+        }
+
+        for (let i = sections.length - 1; i >= 0; i--) {
+            const [headerIndex, ...contentIndices] = sections[i];
+            const id = nanoid(8);
+            tokens[headerIndex].attrPush([headerKey, id]);
+            contentIndices.forEach((index) => {
+                const parentKey = tokens[headerIndex].attrs?.find((attr: [string, string]) => attr[0] === headerKey)?.[1];
+                if (!tokens[index].type.includes("_close")) {
+                    tokens[index].attrPush([contentKey, parentKey]);
+                }
+            });
+
+            const sectionCloseToken = new Token("section_close", "section", -1);
+            const sectionOpenToken = new Token("section_open", "section", 1);
+            sectionOpenToken.attrSet("data-id", id);
+
+            const lastContentIndex = contentIndices[contentIndices.length - 1];
+
+            tokens.splice(lastContentIndex + 1, 0, sectionCloseToken);
+            tokens.splice(headerIndex, 0, sectionOpenToken);
+        }
+
+        return true;
+    });
+};
 
 export default dataAttributePlugin;
