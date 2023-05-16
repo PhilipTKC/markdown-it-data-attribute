@@ -10,11 +10,37 @@ const dataAttributePlugin = (md) => {
     const contentKey = "data-key-content";
     md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
         const id = (0, nanoid_1.nanoid)(8);
+        // Push the data-key attribute to the current heading.
         tokens[idx].attrPush([headerKey, id]);
-        let nextHeaderIdx = idx + 1;
-        while (nextHeaderIdx < tokens.length && tokens[nextHeaderIdx].type !== 'heading_open') {
-            nextHeaderIdx++;
+        /*
+        * Loop through tokens and find the next heading index.
+        * idx is the current heading index.
+        * Example
+        * Start (idx): 0, Next (nextHeadingIdx): Unknown
+        * Loop through tokens to find next heading.
+        * Start (idx): 0, Next (nextHeadingIdx): 5
+        */
+        let nextHeaderIdx = tokens.findIndex((token, i) => i > idx && token.type === 'heading_open');
+        /*
+        * If there is no next heading
+        * Example
+        * ```
+        * # Heading 1 (Current Data Attribute Set)
+        * Paragraph 1 Set in the for loop below.
+        * # Heading 2 (Current Data Attribute Set)
+        * Paragraph 2 (Data attribute cannot be set because no next header was found, nextHeaderIdx === -1)
+        * ```
+        *
+        * Set the nextHeaderIdx to the length of the tokens.
+        * This is require to loop through the remaining tokens.
+        * Paragraph 2 can now be set in the for loop below.
+        */
+        if (nextHeaderIdx === -1) {
+            nextHeaderIdx = tokens.length - 1;
         }
+        /*
+        * Loop through all tokens and set the current header and its siblings to the same id attribute.
+        */
         for (let i = idx + 1; i < nextHeaderIdx; i++) {
             if (!tokens[i].type.includes("_close")) {
                 const parentKey = tokens[idx].attrs.filter(attr => attr[0] === headerKey)[0][1];
