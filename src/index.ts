@@ -9,14 +9,18 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
     const headerKey = "data-key";
     const contentKey = "data-key-content";
 
+    let containsFrontMatter;
+
     md.core.ruler.push("data-attributes", (state: StateCore) => {
         const tokens = state.tokens;
         const sections: number[][] = [];
         let currentSection: number[] = [];
 
-        const containsFrontMatter = tokens[0].markup === "---" && tokens[0].tag === "hr";
-
         for (let i = 0; i < tokens.length; i++) {
+
+            if (i === 0) {
+                containsFrontMatter = tokens[0].markup === "---" && tokens[0].tag === "hr";
+            }
 
             if (tokens[i].type === "heading_open") {
                 if (currentSection.length > 0) {
