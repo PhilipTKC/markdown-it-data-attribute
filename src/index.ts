@@ -14,6 +14,8 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
         const sections: number[][] = [];
         let currentSection: number[] = [];
 
+        const containsFrontMatter = tokens[0].markup === "---" && tokens[0].tag === "hr";
+
         for (let i = 0; i < tokens.length; i++) {
 
             if (tokens[i].type === "heading_open") {
@@ -36,13 +38,15 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
             const [headerIndex, ...contentIndices] = sections[j];
             const id = nanoid(8);
             tokens[headerIndex].attrPush([headerKey, id]);
-            tokens[headerIndex].attrPush(["data-line-number", (tokens[headerIndex].map[0]).toString()]);
+            const lineNumber = containsFrontMatter ? tokens[headerIndex].map[0] - 1 : tokens[headerIndex].map[0];
+            tokens[headerIndex].attrPush(["data-line-number", lineNumber.toString()]);
 
             contentIndices.forEach((index) => {
                 const parentKey = tokens[headerIndex].attrs?.find((attr: [string, string]) => attr[0] === headerKey)?.[1];
                 if (!tokens[index].type.includes("_close")) {
                     tokens[index].attrPush([contentKey, parentKey]);
-                    tokens[index].attrPush(["data-line-number", (tokens[index].map[0]).toString()]);
+                    const lineNumber = containsFrontMatter ? tokens[index].map[0] - 1 : tokens[index].map[0];
+                    tokens[index].attrPush(["data-line-number", lineNumber.toString()]);
                 }
             });
 
