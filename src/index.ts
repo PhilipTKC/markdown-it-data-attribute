@@ -19,9 +19,7 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
         for (let i = 0; i < tokens.length; i++) {
 
             if (i === 0) {
-                console.log(i);
                 containsFrontMatter = tokens[0].markup === "---" && tokens[0].tag === "hr";
-                console.log(containsFrontMatter);
             }
 
             if (tokens[i].type === "heading_open") {
@@ -44,9 +42,13 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
             const [headerIndex, ...contentIndices] = sections[j];
             const id = nanoid(8);
             tokens[headerIndex].attrPush([headerKey, id]);
+
             const map = tokens[headerIndex].map && tokens[headerIndex].map[0];
             const lineNumber = containsFrontMatter ? map - 1 : map;
-            tokens[headerIndex].attrPush(["data-line-number", lineNumber.toString()]);
+
+            if (lineNumber) {
+                tokens[headerIndex].attrPush(["data-line-number", lineNumber.toString()]);
+            }
 
             contentIndices.forEach((index) => {
                 const parentKey = tokens[headerIndex].attrs?.find((attr: [string, string]) => attr[0] === headerKey)?.[1];
@@ -54,7 +56,9 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
                     tokens[index].attrPush([contentKey, parentKey]);
                     const map = tokens[index].map && tokens[index].map[0];
                     const lineNumber = containsFrontMatter ? map - 1 : map;
-                    tokens[index].attrPush(["data-line-number", lineNumber.toString()]);
+                    if (lineNumber) {
+                        tokens[index].attrPush(["data-line-number", lineNumber.toString()]);
+                    }
                 }
             });
 
@@ -73,3 +77,24 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
 };
 
 export default dataAttributePlugin;
+
+const md = new MarkdownIt();
+
+md.use(dataAttributePlugin);
+
+const result = md.render(`
+---
+title: This is a title
+---
+
+## This is a README
+
+| Syntax      | Description | Test Text     |
+| :---        |    :----:   |          ---: |
+| Header      | Title       | Here's this   |
+| Paragraph   | Text        | And more      |
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget leo sapien. Proin varius posuere orci vitae sagittis. Pellentesque ultricies porttitor elit, id tempor arcu pellentesque non. Nulla ac leo sagittis, laoreet elit a, consectetur justo. Curabitur pharetra malesuada vulputate. Praesent pretium sed turpis ut tempor. Donec accumsan consectetur bibendum. Sed quis vestibulum turpis. Duis luctus, turpis at convallis sagittis, ex odio scelerisque nisl, nec bibendum quam sapien non ante.
+`);
+
+console.log(result);
