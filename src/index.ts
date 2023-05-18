@@ -32,14 +32,17 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
             sections.push(currentSection);
         }
 
-        for (let i = sections.length - 1; i >= 0; i--) {
-            const [headerIndex, ...contentIndices] = sections[i];
+        for (let j = sections.length - 1; j >= 0; j--) {
+            const [headerIndex, ...contentIndices] = sections[j];
             const id = nanoid(8);
             tokens[headerIndex].attrPush([headerKey, id]);
+            tokens[headerIndex].attrPush(["data-line-number", (tokens[headerIndex].map[0]).toString()]);
+
             contentIndices.forEach((index) => {
                 const parentKey = tokens[headerIndex].attrs?.find((attr: [string, string]) => attr[0] === headerKey)?.[1];
                 if (!tokens[index].type.includes("_close")) {
                     tokens[index].attrPush([contentKey, parentKey]);
+                    tokens[index].attrPush(["data-line-number", (tokens[index].map[0]).toString()]);
                 }
             });
 

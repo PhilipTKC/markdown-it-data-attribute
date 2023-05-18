@@ -11,6 +11,7 @@ This was created for [Quick-Start](https://github.com/PhilipTKC/quick-start)
 ## Work in Progress
 
 - [ ] Refactor & Comment Code for Clarity and Readability
+- [x] Add Line Number Attribute
 - [ ] Tests
 
 ## Usage & Example

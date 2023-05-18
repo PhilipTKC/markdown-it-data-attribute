@@ -29,15 +29,17 @@ const dataAttributePlugin = (md) => {
         if (currentSection.length > 0) {
             sections.push(currentSection);
         }
-        for (let i = sections.length - 1; i >= 0; i--) {
-            const [headerIndex, ...contentIndices] = sections[i];
+        for (let j = sections.length - 1; j >= 0; j--) {
+            const [headerIndex, ...contentIndices] = sections[j];
             const id = (0, nanoid_1.nanoid)(8);
             tokens[headerIndex].attrPush([headerKey, id]);
+            tokens[headerIndex].attrPush(["data-line-number", (tokens[headerIndex].map[0]).toString()]);
             contentIndices.forEach((index) => {
                 var _a, _b;
                 const parentKey = (_b = (_a = tokens[headerIndex].attrs) === null || _a === void 0 ? void 0 : _a.find((attr) => attr[0] === headerKey)) === null || _b === void 0 ? void 0 : _b[1];
                 if (!tokens[index].type.includes("_close")) {
                     tokens[index].attrPush([contentKey, parentKey]);
+                    tokens[index].attrPush(["data-line-number", (tokens[index].map[0]).toString()]);
                 }
             });
             const sectionCloseToken = new token_1.default("section_close", "section", -1);
