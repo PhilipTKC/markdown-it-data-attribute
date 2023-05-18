@@ -77,24 +77,3 @@ const dataAttributePlugin: PluginSimple = (md: MarkdownIt) => {
 };
 
 export default dataAttributePlugin;
-
-const md = new MarkdownIt();
-
-md.use(dataAttributePlugin);
-
-const result = md.render(`
----
-title: This is a title
----
-
-## This is a README
-
-| Syntax      | Description | Test Text     |
-| :---        |    :----:   |          ---: |
-| Header      | Title       | Here's this   |
-| Paragraph   | Text        | And more      |
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget leo sapien. Proin varius posuere orci vitae sagittis. Pellentesque ultricies porttitor elit, id tempor arcu pellentesque non. Nulla ac leo sagittis, laoreet elit a, consectetur justo. Curabitur pharetra malesuada vulputate. Praesent pretium sed turpis ut tempor. Donec accumsan consectetur bibendum. Sed quis vestibulum turpis. Duis luctus, turpis at convallis sagittis, ex odio scelerisque nisl, nec bibendum quam sapien non ante.
-`);
-
-console.log(result);
