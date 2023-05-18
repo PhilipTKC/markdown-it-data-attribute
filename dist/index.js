@@ -8,11 +8,15 @@ const nanoid_1 = require("nanoid");
 const dataAttributePlugin = (md) => {
     const headerKey = "data-key";
     const contentKey = "data-key-content";
+    let containsFrontMatter;
     md.core.ruler.push("data-attributes", (state) => {
         const tokens = state.tokens;
         const sections = [];
         let currentSection = [];
         for (let i = 0; i < tokens.length; i++) {
+            if (i === 0) {
+                containsFrontMatter = tokens[0].markup === "---" && tokens[0].tag === "hr";
+            }
             if (tokens[i].type === "heading_open") {
                 if (currentSection.length > 0) {
                     sections.push(currentSection);
@@ -33,13 +37,15 @@ const dataAttributePlugin = (md) => {
             const [headerIndex, ...contentIndices] = sections[j];
             const id = (0, nanoid_1.nanoid)(8);
             tokens[headerIndex].attrPush([headerKey, id]);
-            tokens[headerIndex].attrPush(["data-line-number", (tokens[headerIndex].map[0]).toString()]);
+            const lineNumber = containsFrontMatter ? tokens[headerIndex].map[0] - 1 : tokens[headerIndex].map[0];
+            tokens[headerIndex].attrPush(["data-line-number", lineNumber.toString()]);
             contentIndices.forEach((index) => {
                 var _a, _b;
                 const parentKey = (_b = (_a = tokens[headerIndex].attrs) === null || _a === void 0 ? void 0 : _a.find((attr) => attr[0] === headerKey)) === null || _b === void 0 ? void 0 : _b[1];
                 if (!tokens[index].type.includes("_close")) {
                     tokens[index].attrPush([contentKey, parentKey]);
-                    tokens[index].attrPush(["data-line-number", (tokens[index].map[0]).toString()]);
+                    const lineNumber = containsFrontMatter ? tokens[index].map[0] - 1 : tokens[index].map[0];
+                    tokens[index].attrPush(["data-line-number", lineNumber.toString()]);
                 }
             });
             const sectionCloseToken = new token_1.default("section_close", "section", -1);
