@@ -1,18 +1,14 @@
 # Markdown It Data Attribute
 
+## Plugin no longer required.
+
 ## Description
 
 Automatically appends a data attribute to each element in the markdown document.
 
 Documents are converted into sections based on the headings and its contents. Each section is given a unique id. Each element in the section is given a data attribute with the id of the section.
 
-This was created for [Quick-Start](https://github.com/PhilipTKC/quick-start)
-
-## Work in Progress
-
-- [ ] Refactor & Comment Code for Clarity and Readability
-- [x] Add Line Number Attribute
-- [ ] Tests
+Create for personal use for specific use case for [Quick-Start](https://github.com/PhilipTKC/quick-start).
 
 ## Usage & Example
 
